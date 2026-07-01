@@ -216,3 +216,5 @@ Thumbs.db
 *.pid
 
 
+
+/generated/prisma
