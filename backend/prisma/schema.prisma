@@ -1,0 +1,42 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// User of MapSafe (future login system)
+model User {
+  id        String   @id @default(cuid())
+  name      String
+  email     String   @unique
+  createdAt DateTime @default(now())
+
+  ratings   Rating[]
+}
+
+// A location on the map (area being rated)
+model Location {
+  id        String   @id @default(cuid())
+  name      String
+  latitude  Float
+  longitude Float
+
+  ratings   Rating[]
+}
+
+// Safety rating submitted by users (1 = safe, 10 = dangerous)
+model Rating {
+  id         String   @id @default(cuid())
+  score      Int
+  comment    String?
+  createdAt  DateTime @default(now())
+
+  userId     String
+  locationId String
+
+  user       User     @relation(fields: [userId], references: [id])
+  location   Location @relation(fields: [locationId], references: [id])
+}
