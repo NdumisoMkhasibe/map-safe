@@ -1,27 +1,31 @@
 import express from "express";
 
-// Create the Express application instance
-// This is the main "app" that handles all routes and middleware
+import healthRoutes from "./routes/health.routes";
+import ratingRoutes from "./routes/rating.routes";
+
+/**
+ * Create the main Express application.
+ * This object is exported to server.ts, where the HTTP server is started.
+ */
 const app = express();
 
 /**
  * Middleware
- * This allows the server to read JSON data from incoming requests
- * (e.g. POST requests from frontend)
+ * Allows the API to accept and process JSON request bodies.
  */
 app.use(express.json());
 
 /**
- * Health Check Route
- * Used to verify that the backend is running correctly
- * This is useful for monitoring and deployment checks
+ * Register application routes.
+ *
+ * /health  -> Health monitoring endpoints
+ * /ratings -> Safety rating endpoints
  */
-app.get("/health", (_req, res) => {
-  res.status(200).json({
-    status: "ok",
-    service: "MapSafe backend",
-    timestamp: new Date().toISOString()
-  });
-});
+app.use("/health", healthRoutes);
+app.use("/ratings", ratingRoutes);
 
+/**
+ * Export the configured Express application.
+ * The server is started separately in server.ts.
+ */
 export default app;
