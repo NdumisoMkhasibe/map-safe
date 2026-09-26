@@ -1,7 +1,7 @@
 import { randomUUID } from 'node:crypto';
 import express, { type Request, type Response, type NextFunction } from 'express';
 import cors from 'cors';
-import helmet from 'helmet';
+import { default as helmet } from 'helmet';
 import { rateLimit } from 'express-rate-limit';
 import { Prisma, type PrismaClient, type User } from '@prisma/client';
 import { z, ZodError } from 'zod';
