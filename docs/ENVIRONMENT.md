@@ -4,24 +4,24 @@ Copy `backend/.env.example` and `frontend/.env.example` to ignored `.env` files 
 
 ## Backend
 
-| Variable                 | Default / format                       | Purpose                                                                               |
-| ------------------------ | -------------------------------------- | ------------------------------------------------------------------------------------- |
-| `NODE_ENV`               | `development`                          | Production enables stricter configuration/cookies and forbids fixture authentication. |
-| `PORT`                   | `3001`                                 | Backend HTTP listener behind the production proxy.                                    |
-| `DATABASE_URL`           | PostgreSQL connection string, required | Application database; use a least-privileged production role.                         |
-| `TEST_DATABASE_URL`      | Separate PostgreSQL connection string  | Dedicated disposable integration database; never production.                          |
-| `FRONTEND_ORIGIN`        | `http://localhost:5173`                | Exact allowed web origin for credentialed CORS and mutation checks.                   |
-| `GOOGLE_CLIENT_ID`       | Google web client ID                   | Audience for server-side credential verification.                                     |
-| `ADMIN_EMAILS`           | Comma-separated allowlist              | Admin bootstrap; requires authoritative Google email, not request-supplied identity.  |
-| `ENABLE_DEV_AUTH`        | `false`                                | Explicit local/test fixture switch; rejected in production.                           |
-| `SESSION_DAYS`           | `7`                                    | Server-session lifetime.                                                              |
-| `SCORE_HALF_LIFE_DAYS`   | `180`                                  | Positive exponential decay half-life.                                                 |
-| `OVERLAP_THRESHOLD`      | `0.6`                                  | Fraction of smaller polygon intersected before seven-day cooldown blocks.             |
-| `GEOCODING_PROVIDER`     | `disabled` or `nominatim`              | Search provider selection; deliberate opt-in.                                         |
-| `GEOCODING_USER_AGENT`   | Identifying application and contact    | Required for Nominatim; configure a real owner contact.                               |
-| `GEOCODING_BASE_URL`     | Nominatim-compatible service base URL  | Replace provider endpoint without frontend business-logic changes.                    |
-| `GEOCODING_CACHE_TTL_MS` | `86400000`                             | In-process successful search cache lifetime.                                          |
-| `TRUST_PROXY`            | `false`                                | Enable only for the actual trusted reverse-proxy topology.                            |
+| Variable                 | Default / format                                      | Purpose                                                                               |
+| ------------------------ | ----------------------------------------------------- | ------------------------------------------------------------------------------------- |
+| `NODE_ENV`               | `development`                                         | Production enables stricter configuration/cookies and forbids fixture authentication. |
+| `PORT`                   | `3001`                                                | Backend HTTP listener behind the production proxy.                                    |
+| `DATABASE_URL`           | PostgreSQL connection string, required                | Application database; use a least-privileged production role.                         |
+| `TEST_DATABASE_URL`      | Separate PostgreSQL connection string                 | Dedicated disposable integration database; never production.                          |
+| `FRONTEND_ORIGIN`        | `http://localhost:5173`                               | Exact allowed web origin for credentialed CORS and mutation checks.                   |
+| `GOOGLE_CLIENT_ID`       | Google web client ID                                  | Audience for server-side credential verification.                                     |
+| `ADMIN_EMAILS`           | Comma-separated allowlist                             | Admin bootstrap; requires authoritative Google email, not request-supplied identity.  |
+| `ENABLE_DEV_AUTH`        | `false`                                               | Explicit local/test fixture switch; rejected in production.                           |
+| `SESSION_DAYS`           | `7`                                                   | Server-session lifetime.                                                              |
+| `SCORE_HALF_LIFE_DAYS`   | `180`                                                 | Positive exponential decay half-life.                                                 |
+| `OVERLAP_THRESHOLD`      | `0.6`                                                 | Fraction of smaller polygon intersected before seven-day cooldown blocks.             |
+| `GEOCODING_PROVIDER`     | `nominatim` or `disabled`                             | Search provider selection; defaults to explicit Nominatim search.                     |
+| `GEOCODING_USER_AGENT`   | `MapSafe/0.2.0 (contact: mkhasibendumiso3@gmail.com)` | Identifies MapSafe to the Nominatim service operator.                                 |
+| `GEOCODING_BASE_URL`     | Nominatim-compatible service base URL                 | Replace provider endpoint without frontend business-logic changes.                    |
+| `GEOCODING_CACHE_TTL_MS` | `86400000`                                            | In-process successful search cache lifetime.                                          |
+| `TRUST_PROXY`            | `false`                                               | Enable only for the actual trusted reverse-proxy topology.                            |
 
 Do not expose the database publicly or reuse local demonstration passwords in production. Production must use an HTTPS frontend origin. An empty client ID disables real sign-in in development; it is not a reason to enable fixtures publicly.
 
@@ -42,13 +42,13 @@ A compatible map style/provider can be switched by changing build configuration.
 
 ## Place search
 
-**Read and deliberately accept the [public Nominatim usage policy](https://operations.osmfoundation.org/policies/nominatim/) before enabling it.** The default is disabled. The application owner is responsible for compliance.
+The application owner has deliberately approved public Nominatim for MapSafe's explicit, low-volume place searches. The default is enabled, and the identifying User-Agent includes the supplied project contact. Review the [public Nominatim usage policy](https://operations.osmfoundation.org/policies/nominatim/) before changing this configuration or scaling usage.
 
-Public Nominatim permits modest, explicitly user-triggered requests with an identifying User-Agent/Referer, attribution, caching and an application-wide maximum of one upstream request per second. Autocomplete, systematic/bulk queries and background searches are unsuitable. Do not submit personal/confidential search text. Service access and policy can change.
+Public Nominatim permits modest, explicitly user-triggered requests with an identifying User-Agent/Referer, attribution, caching and an application-wide maximum of one upstream request per second. MapSafe does not use autocomplete. The request gate is process-local, so production must run one API instance unless a shared gate/cache is added. Systematic/bulk queries and background searches are unsuitable. Do not submit personal/confidential search text. Service access and policy can change.
 
 The adapter uses explicit Search submissions, a bounded server cache and a serialized request gate. Its gate/cache are in one process; multiple API instances would multiply upstream traffic. Keep a single instance or replace the provider/add a shared gate before scaling. Do not point automated tests at the public service.
 
-To enable deliberately: choose `GEOCODING_PROVIDER=nominatim`, set a real identifying `GEOCODING_USER_AGENT` with owner contact, verify the base URL and keep attribution. To disable quickly, select `disabled` and restart. A self-hosted or alternative compatible endpoint can use `GEOCODING_BASE_URL`; a different API requires another implementation of the provider interface. No paid service may be introduced without owner approval.
+To disable quickly, select `GEOCODING_PROVIDER=disabled` and restart. A self-hosted or alternative compatible endpoint can use `GEOCODING_BASE_URL`; a different API requires another implementation of the provider interface. No paid service may be introduced without owner approval.
 
 ## Browser and proxy behavior
 

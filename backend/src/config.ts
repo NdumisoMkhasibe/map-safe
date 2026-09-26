@@ -24,8 +24,8 @@ const envSchema = z.object({
   SESSION_DAYS: z.coerce.number().positive().max(30).default(7),
   SCORE_HALF_LIFE_DAYS: z.coerce.number().positive().default(180),
   OVERLAP_THRESHOLD: z.coerce.number().min(0.01).max(1).default(0.6),
-  GEOCODING_PROVIDER: z.enum(['disabled', 'nominatim']).default('disabled'),
-  GEOCODING_USER_AGENT: z.string().default(''),
+  GEOCODING_PROVIDER: z.enum(['disabled', 'nominatim']).default('nominatim'),
+  GEOCODING_USER_AGENT: z.string().default('MapSafe/0.2.0 (contact: mkhasibendumiso3@gmail.com)'),
   GEOCODING_BASE_URL: z.string().url().default('https://nominatim.openstreetmap.org'),
   GEOCODING_CACHE_TTL_MS: z.coerce.number().positive().default(86_400_000),
 });

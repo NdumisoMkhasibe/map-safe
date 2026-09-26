@@ -51,7 +51,7 @@ Use [the environment reference](ENVIRONMENT.md) and the checked-in examples as t
 - Real `GOOGLE_CLIENT_ID` and authorized Google JavaScript origin.
 - Intended `ADMIN_EMAILS` only; validate authoritative Google email bootstrap.
 - `ENABLE_DEV_AUTH=false` and frontend fixtures disabled.
-- Map provider/style/attribution, plus a deliberate geocoder configuration or disabled search.
+- Map provider/style/attribution and geocoder configuration. Public Nominatim is enabled by default; disable it explicitly if the deployment cannot meet its usage policy or single-instance request budget.
 
 Secret injection belongs to deployment configuration, not Git. The app needs no client secret in browser code. Do not import local demo passwords or seeded content. Verify secure cookies over HTTPS and login/logout from the intended origin.
 

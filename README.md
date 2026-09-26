@@ -89,7 +89,7 @@ For isolated local demonstrations/tests, development fixtures can be enabled exp
 
 The map style, provider name and attribution are frontend environment configuration. The initial OpenFreeMap integration needs no committed API key; [provider setup](https://openfreemap.org/quick_start/) and attribution should be reviewed for deployment.
 
-Place search starts **disabled** until an operator selects a provider. The low-volume Nominatim adapter is optional and requires deliberate policy acceptance, identifying contact information, caching and a single-instance request budget. See [provider configuration and restrictions](docs/ENVIRONMENT.md#place-search). Typing does not trigger searches. No public geocoding traffic is needed by automated tests.
+Place search uses public Nominatim by default for explicit user searches. The app identifies MapSafe with the supplied project contact, caches results and serializes upstream requests to at most one per second per backend instance. Keep one API instance unless a shared rate limit/cache is added. Typing does not trigger searches and there is no autocomplete. Set `GEOCODING_PROVIDER=disabled` to turn it off. See [provider configuration and restrictions](docs/ENVIRONMENT.md#place-search). Automated tests do not send public geocoding traffic.
 
 ## Commands
 

@@ -92,7 +92,7 @@ Current local status: implementation and verification in progress. The checklist
 - **Labels:** `enhancement`, `backend`, `frontend`
 - **Suggested branch:** `feature/place-search`
 - **Status:** Local implementation; acceptance verification pending.
-- **Description:** Introduce a disabled-by-default geocoder interface and deliberately configured low-volume Nominatim adapter with application identification, cache, timeout and serialized request budget.
+- **Description:** Introduce a low-volume Nominatim adapter with application identification, cache, timeout and serialized request budget; enable explicit place search by default after operator approval.
 - **Acceptance:** Typing causes no network searches; explicit searches use API; cache and one-request-per-second upstream gate are tested without public traffic; failures remain usable; multi-instance limit documented.
 
 ### test(mvp): cover domain, APIs and core browser journeys
@@ -128,10 +128,10 @@ Record command, environment, result and coverage summary when each check actuall
 
 - [x] Inspect baseline code, migrations, docs and Git state.
 - [x] Compile and run baseline backend; observe HTTP 200 from health.
-- [ ] Reproduce clean install with the pinned Node/npm environment.
+- [x] Reproduce a clean install using the supported Node 24/npm 11 toolchain (tested with Node 24.21.0/npm 11.19.0).
 - [x] Generate the Prisma 5.22 client from the updated schema; schema validation completed as part of generation.
 - [x] Apply both committed migrations to an empty `mapsafe_test` PostgreSQL database.
-- [ ] Apply the forward migration to a database containing legacy User/Location/Rating records; verify preservation.
+- [x] Apply the forward migration to a database containing legacy User/Location/Rating records; verify preservation using synthetic fixtures in a separate local test database.
 - [x] Run the non-production seed repeatedly; confirm it is repeatable and clearly labelled demo content.
 - [x] Pass formatting, lint and strict typechecking with `npm run check`.
 - [x] Pass backend and frontend unit/component suites: 50 domain tests and 2 score component tests.
@@ -143,9 +143,9 @@ Record command, environment, result and coverage summary when each check actuall
 - [x] Inspect desktop/mobile layouts, keyboard navigation and provider attribution with seeded browser captures; reposition the map score legend and provider label so they no longer cover the attribution control.
 - [x] Review map-provider failure behavior: the fallback message, community browsing and coordinate-based report setup remain available. Browser journeys use a controlled local style fixture, not the live provider.
 - [ ] Complete manual Google sign-in/logout/admin-bootstrap checks on the intended origin. The owner reports that real local Google sign-in now succeeds; automated database checks use a controlled verifier and do not replace this live-service check.
-- [ ] Validate chosen live map provider and, if enabled, operator-approved search configuration.
-- [ ] Review public data privacy, production env, migrations/backups and current dependency findings.
-- [ ] Review Git diff/status for secrets, generated artifacts and unintended changes.
+- [x] Validate the configured OpenFreeMap style endpoint and attribution. The operator approved Nominatim, supplied a project contact, and the request configuration is enabled by default; automated checks still avoid public geocoding traffic.
+- [ ] Review public data privacy, production env, migrations/backups and current dependency findings. Static privacy/deployment review and dependency audit are recorded; production configuration and a backup-restore rehearsal await a selected host/database.
+- [x] Review Git diff/status for secrets, generated artifacts and unintended changes; changes are limited to documented code/configuration, the tracked `.env.example`, this ledger, and the audited dependency lockfile. Real `.env` files and generated artifacts are untouched.
 - [ ] Observe remote CI after pushing; do not infer remote success from local runs.
 
 ### Local verification results (2026-09-26)
@@ -155,12 +155,18 @@ Record command, environment, result and coverage summary when each check actuall
 - `npm run build`: passed for backend and frontend. The separate MapLibre chunk is approximately 1.03 MB minified / 281 kB gzip and should be reviewed for a future mobile-network budget.
 - `npm run test:coverage`: passed, but measured coverage is **18.33% backend lines / 15.74% functions / 15.77% branches** and **2.17% frontend lines / 1.44% functions / 3.44% branches**. These are far below the proposed target; the small local unit/component suite does not exercise API/services or full UI flows.
 - The repository's embedded PostgreSQL 18.4 instance responded on `127.0.0.1:55432`; the launcher was updated to recognize and reuse that process. Both migrations applied to a clean `mapsafe_test` database. An initial development migration attempt exposed a retained `Rating_pkey` index name after table rename; the forward migration now renames legacy constraints first. The development seed ran repeatedly without duplicate data.
+- `mapsafe_legacy_verify_20260926_test`: applied the original schema, inserted one fictional legacy user/location/rating, marked the original migration applied, then ran `npm run db:deploy` for the forward migration. Verified user fields and safe role/status defaults, exact point coordinates, rating score/comment/timestamps and foreign-key links were preserved in `LegacyLocation`/`LegacyRating`. Both new `Area` and current `Rating` tables remained empty, so no quadrilateral or current report was fabricated. The temporary database was removed after verification; no data from another device was used.
 - `npm run test:integration`: passed all 7 API tests against `mapsafe_test`. Added controlled Google-identity cases confirm user upsert and PostgreSQL persistence, hashed sessions, authoritative `ADMIN_EMAILS` bootstrap, denial of an allowlisted but non-authoritative email, admin-only access, audited suspension/session revocation, admin-account protection, and one-winner behavior for concurrent overlapping submissions. These cases exercise the API and database with a test identity verifier; they do not call Google.
 - `npm run test:e2e`: passed all 10 Playwright journeys across desktop and mobile against `mapsafe_e2e`, using development auth and a local map style fixture. Coverage includes provider-failure fallback and desktop/mobile attribution visibility/non-overlap assertions. This does not validate live Google sign-in or a production map provider. Hosted CI has not been observed.
+- A fresh isolated checkout using the updated lockfile installed successfully with `npm ci` on Node 24.21.0/npm 11.19.0, generated Prisma 5.22.0, reported zero vulnerabilities with `npm audit`, and passed `npm run check`. npm warned that some dependency install scripts have not been explicitly reviewed; manual Prisma generation, tests and builds all passed. The repository constrains Node to major 24 and npm to 11 or newer; it does not pin an exact npm release.
+- `npm audit` initially reported a high-severity `brace-expansion` issue and a low-severity Windows `esbuild` issue in transitive development dependencies. `npm audit fix --package-lock-only --ignore-scripts` updated only lockfile resolutions; the clean audit now reports zero vulnerabilities.
+- After stopping the repository-local embedded PostgreSQL process cleanly, `npm ci` succeeded in the working tree; the Rollup native module was restored, Prisma 5.22.0 generated, and `npm run check` passed. PostgreSQL data remains in `.local/postgres`; its server and the application dev servers are currently stopped.
+- The configured `https://tiles.openfreemap.org/styles/positron` endpoint returned HTTP 200 with two valid sources plus sprite/font URLs. OpenFreeMap's current published site states its public instance is free with no map-view/request quota and requires attribution; it provides no SLA. The MVP keeps its visible provider attribution and failure fallback. See [OpenFreeMap](https://openfreemap.org/) and its [Quick Start](https://openfreemap.org/quick_start/).
+- Static review confirmed privacy disclosures, public identity minimization, no raw GPS retention, explicit-search geocoding safeguards, migration/backup guidance and production secret handling are documented. No production host/database exists yet, so real production configuration and a backup-restore rehearsal remain open.
 - The owner reports that real Google sign-in succeeds locally. This turn's Google auth integration coverage uses a controlled verifier; manual logout/admin-bootstrap checks remain open. Desktop/mobile screenshots were visually reviewed with fictional data and a controlled map fixture; keyboard navigation and the provider-failure fallback are covered by browser journeys. Live map-provider integration remains open.
 
 ## External setup and release boundary
 
-The owner must configure a Google web client and authorized origins, choose deployment infrastructure and supply production database/HTTPS configuration. No external resources, billing or paid services are provisioned. Public Nominatim requires a deliberate operator decision and a conforming application identifier; search starts disabled.
+The owner must configure a Google web client and authorized origins, choose deployment infrastructure and supply production database/HTTPS configuration. No hosting or production resources are provisioned. The owner approved public Nominatim with a supplied identifying contact; production must keep to one API instance until the request budget/cache is shared across instances.
 
 Suggested next release is **0.2.0** after verification, preferably a prerelease such as `0.2.0-beta.1` while real-credential/operational checks remain. No tag or GitHub release has been published as part of this ledger.
