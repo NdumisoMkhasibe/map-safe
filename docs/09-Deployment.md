@@ -2,6 +2,14 @@
 
 MapSafe can run on a vendor-neutral Node host with PostgreSQL and static frontend hosting. No hosting, external database, billing or domain is provisioned by this repository. Recheck costs and terms when selecting a host; a provider's “free tier” is not assumed permanent.
 
+## Vercel with Neon
+
+The repository root is an npm workspace. For one same-origin Vercel project, set the Root Directory to `.`, choose the Express framework preset, set the Build Command to `npm run vercel:build`, and leave Output Directory unset. Let Vercel detect the npm install command from the root lockfile. The root `server.ts` exports the existing Express API; the build script generates Prisma Client, builds Vite and copies its static bundle into `public/` for Vercel's CDN. Do not deploy from the `frontend/` or `backend/` subdirectory as separate projects; the session cookie and Origin checks expect one HTTPS origin.
+
+Set Vercel's Node.js version to 24.x. Configure production environment variables in Vercel, not Git: Neon `DATABASE_URL` (use its pooled connection string for function traffic), `GOOGLE_CLIENT_ID`, `ADMIN_EMAILS`, `TRUST_PROXY=true`, `ENABLE_DEV_AUTH=false`, `GEOCODING_PROVIDER=disabled`, and the public Vite settings such as `VITE_GOOGLE_CLIENT_ID`. Vercel's deployment URL is used as the default frontend origin; set `FRONTEND_ORIGIN` explicitly if using a custom production domain. Add that final origin to Google's authorized JavaScript origins. Preview deployments use their own Vercel URL and need corresponding Google origin configuration if real sign-in is required there.
+
+Apply schema migrations separately with `npm run db:deploy` using Neon's direct connection string in a controlled shell before serving the new deployment. Do not use the pooled runtime URL for migrations if the provider's pooler does not support the migration connection features. Keep both connection strings private and out of logs, chat, Git and browser variables. Vercel Functions may run concurrently across instances, while MapSafe's public Nominatim request gate/cache are process-local. Keep geocoding disabled on Vercel until a shared application-wide rate gate and cache are implemented.
+
 ## Recommended topology
 
 ```mermaid

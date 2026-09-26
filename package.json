@@ -14,6 +14,7 @@
   },
   "scripts": {
     "dev": "concurrently -k -n api,web -c cyan,green \"npm run dev -w backend\" \"npm run dev -w frontend\"",
+    "vercel:build": "npm run db:generate && npm run build -w frontend && node scripts/copy-vercel-assets.mjs",
     "dev:backend": "npm run dev -w backend",
     "dev:frontend": "npm run dev -w frontend",
     "build": "npm run build --workspaces",
@@ -31,6 +32,9 @@
     "db:deploy": "npm run db:deploy -w backend",
     "db:seed": "npm run db:seed -w backend",
     "check": "npm run format:check && npm run lint && npm run typecheck && npm test && npm run build"
+  },
+  "dependencies": {
+    "express": "5.2.1"
   },
   "devDependencies": {
     "@eslint/js": "9.39.1",
