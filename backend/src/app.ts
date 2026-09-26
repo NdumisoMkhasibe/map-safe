@@ -1,7 +1,7 @@
 import { randomUUID } from 'node:crypto';
 import express, { type Request, type Response, type NextFunction } from 'express';
 import cors from 'cors';
-import { default as helmet } from 'helmet';
+import * as helmet from 'helmet';
 import { rateLimit } from 'express-rate-limit';
 import { Prisma, type PrismaClient, type User } from '@prisma/client';
 import { z, ZodError } from 'zod';
@@ -79,7 +79,7 @@ export function createApp({ db, config, verifier, geocoder, now = () => new Date
     sameSite: 'lax' as const,
     path: '/api/v1',
   };
-  app.use(helmet());
+  app.use(helmet.default());
   app.use((req, res, next) => {
     res.locals.requestId = randomUUID();
     res.setHeader('X-Request-ID', res.locals.requestId as string);
