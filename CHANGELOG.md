@@ -9,10 +9,20 @@ This project follows the principles of [Keep a Changelog](https://keepachangelog
 ## [Unreleased]
 
 ### Added
-- Planned Location API
-- Planned Ratings API
-- Planned Authentication
-- Planned Frontend integration
+
+- Responsive React/TypeScript web client with MapLibre, editable quadrilateral areas, explicit place search and accessible score labels.
+- Versioned Express API with Google identity-token verification, hashed HTTP-only sessions, public read endpoints and authenticated reporting.
+- PostgreSQL/Prisma 5 area, rating, incident, verification, account, session and moderation-audit models.
+- Exponential score decay, overlapping-area composite scores, seven-day visit attestation and configurable overlap cooldown.
+- Optional GPS verification without persisting raw coordinates, incident categories, admin moderation and explicit disabled-by-default geocoding.
+- Domain/component, PostgreSQL integration and Playwright test infrastructure plus GitHub Actions checks.
+- Forward migration retaining old point data as legacy records, fictional repeatable local demo seed and deployment/setup documentation.
+
+### Changed
+
+- Superseded the original point model with editable quadrilateral review areas (ADR-002).
+- Kept Prisma 5.22 as the sole Prisma toolchain and removed accidental root Prisma 7 setup.
+- Replaced planned JWT/email-password and Google Maps approaches with Google-only OIDC and provider-configurable MapLibre/OpenFreeMap.
 
 ---
 
@@ -21,6 +31,7 @@ This project follows the principles of [Keep a Changelog](https://keepachangelog
 ### Added
 
 #### Project Foundation
+
 - Created GitHub repository.
 - Added README with project overview.
 - Added Product Vision document.
@@ -30,6 +41,7 @@ This project follows the principles of [Keep a Changelog](https://keepachangelog
 - Created GitHub milestones, issues, labels, and Kanban board.
 
 #### Backend
+
 - Initialized Node.js project.
 - Configured TypeScript.
 - Added Express server.
@@ -44,6 +56,7 @@ This project follows the principles of [Keep a Changelog](https://keepachangelog
   - Utilities
 
 #### Database
+
 - Installed PostgreSQL.
 - Configured Prisma ORM.
 - Created initial database schema.
@@ -54,6 +67,7 @@ This project follows the principles of [Keep a Changelog](https://keepachangelog
 - Connected Prisma Client.
 
 #### Documentation
+
 - Added CONTRIBUTING.md.
 - Added CHANGELOG.md.
 - Added Architecture Decision Records (ADR).
@@ -61,38 +75,4 @@ This project follows the principles of [Keep a Changelog](https://keepachangelog
 
 ---
 
-## Upcoming
-
-### Version 0.2.0 (Planned)
-
-- Location API
-- Ratings API
-- Validation middleware
-- Error handling
-- API documentation
-
----
-
-### Version 0.3.0 (Planned)
-
-- User authentication
-- JWT support
-- User profiles
-
----
-
-### Version 0.4.0 (Planned)
-
-- Frontend map integration
-- Google Maps support
-- Safety visualization
-
----
-
-### Version 1.0.0 (Vision)
-
-- Complete MapSafe MVP
-- Interactive safety map
-- Community ratings
-- Search functionality
-- Production deployment
+The next suggested release is **0.2.0-beta.1** after the open database, real Google credential, browser and operational checks in [the implementation ledger](docs/CODEX_IMPLEMENTATION_PLAN.md) pass. No release has been published.

@@ -1,115 +1,43 @@
 # Contributing to MapSafe
 
-Thank you for your interest in contributing to MapSafe!
+MapSafe summarizes community experiences. Preserve the product's privacy, accessibility and uncertainty language as carefully as its code.
 
-MapSafe is a community-driven platform that aims to help users make informed safety decisions by collecting and visualizing community safety reports.
+## Set up and verify
 
-## Project Goals
+Follow [README](README.md) with Node 24 and a dedicated local PostgreSQL database. Keep credentials in ignored environment files. Use a separate test database: integration tests may clear their test data.
 
-- Build a reliable and scalable safety mapping platform.
-- Follow clean software engineering practices.
-- Write maintainable, well-documented code.
-- Keep the project beginner-friendly while maintaining professional standards.
+Before committing, run relevant tests, typechecking and a build. At each logical milestone, run the full checks documented in [testing strategy](docs/08-Testing-Strategy.md). Report actual coverage, failures and unexecuted checks. Tests must not depend on live Google, map or public geocoding services.
 
----
+## Workflow
 
-## Development Workflow
+1. Inspect existing issues and reuse one matching the change. If remote access is unavailable, add its exact proposed title, description, labels and milestone to [the local plan](docs/CODEX_IMPLEMENTATION_PLAN.md).
+2. Create a focused branch, such as `feature/area-domain`, `feature/google-auth`, `test/e2e` or `docs/mvp`.
+3. Implement one reviewable concern, updating tests and documentation with the contract.
+4. Use Conventional Commits, for example `feat(rating): enforce overlap cooldown` or `test(auth): reject invalid Google claims`.
+5. Open a PR describing the concrete behavior change, validation and remaining limits. Reference the issue; include screenshots for material UI changes.
+6. Close the issue and update its board only after acceptance passes.
 
-Every new feature should follow this workflow:
+Do not bundle unrelated changes into a giant “finish MVP” commit. Do not claim remote actions that have not happened.
 
-1. Create or assign a GitHub Issue.
-2. Move the issue to **In Progress**.
-3. Create a feature branch.
-4. Implement the feature.
-5. Test locally.
-6. Commit using meaningful commit messages.
-7. Push the branch.
-8. Open a Pull Request.
-9. Merge into `main`.
-10. Close the issue and update the Kanban board.
+## Code and design standards
 
----
+Use strict TypeScript and focused functions. Routes/middleware own HTTP concerns, domain/services own product rules, and data access owns persistence. Avoid unneeded microservices or provider coupling.
 
-## Branch Naming
+Add comments explaining file responsibility, security assumptions, geospatial/scoring rules and non-obvious workarounds. Explain why rather than restating syntax. Prefer code a junior contributor can follow.
 
-Use descriptive branch names.
+Keep these invariants intact:
 
-Examples:
+- Score 1 is extremely safe; 10 is extremely unsafe. Always show text and numbers with colour.
+- Reviewed areas are quadrilaterals; raw current GPS is not retained.
+- Authentication/roles come from server-verified identity, never a JSON user ID.
+- Moderation is soft, audited and server-authorized.
+- Database changes use forward migrations; never erase or rewrite applied migrations.
+- No paid dependency/service or billing setup without explicit owner authorization.
+- Provider URLs and attribution are configurable; public geocoding is explicit and policy-constrained.
+- Development fixtures cannot run in production.
 
-```
-feature/location-api
-feature/ratings-api
-feature/authentication
-bugfix/login-validation
-docs/update-readme
-```
+## Documentation and review
 
----
+Update API/env/setup docs when code contracts change. Significant decisions need an ADR; supersede accepted records rather than rewriting history. Add meaningful tests for behavior and failure cases, not tests that only restate implementation.
 
-## Commit Message Convention
-
-Use Conventional Commits where possible.
-
-Examples:
-
-```
-feat: add location API
-fix: resolve health endpoint bug
-docs: update README
-refactor: simplify rating service
-test: add unit tests for location service
-```
-
----
-
-## Coding Standards
-
-- Use TypeScript.
-- Write clear and descriptive comments.
-- Keep functions focused on a single responsibility.
-- Follow the layered architecture:
-  - Routes
-  - Controllers
-  - Services
-  - Prisma/Data Access
-- Prefer readable code over clever code.
-- Test new functionality before opening a Pull Request.
-
----
-
-## Pull Requests
-
-Each Pull Request should:
-
-- Reference the related GitHub Issue.
-- Include a clear description of the changes.
-- Keep the scope focused on a single feature or fix.
-- Pass all local tests before merging.
-
----
-
-## Documentation
-
-When introducing significant architectural decisions:
-
-- Update the README if necessary.
-- Add or update an Architecture Decision Record (ADR).
-- Document any new environment variables or setup steps.
-
----
-
-## Reporting Issues
-
-When creating an issue, include:
-
-- A clear title.
-- A description of the problem or feature.
-- Steps to reproduce (for bugs).
-- Expected behaviour.
-- Screenshots if applicable.
-
----
-
-## Thank You
-
-Every contribution, whether code, documentation, bug reports, or suggestions, helps make MapSafe better.
+Keep screenshots free of personal details, tokens and real private reports. Never commit `.env`, production data, coverage output, generated builds or local database directories. Raise security reports privately through a channel agreed with the repository owner; do not include secrets in public issues.

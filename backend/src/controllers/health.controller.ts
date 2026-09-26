@@ -1,7 +1,7 @@
 // src/controllers/health.controller.ts
 
-import { Request, Response } from "express";
-import { getHealthStatus } from "../services/health.service";
+import { Request, Response } from 'express';
+import { getHealthStatus } from '../services/health.service.js';
 
 export function healthCheck(req: Request, res: Response) {
   const status = getHealthStatus();

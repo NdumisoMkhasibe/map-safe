@@ -2,7 +2,7 @@
 
 ## Status
 
-Accepted
+Superseded by [ADR-002: Quadrilateral areas](ADR-002-quadrilateral-areas.md) on 2026-09-26. The original decision text below is preserved as historical context.
 
 ## Date
 

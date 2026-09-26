@@ -1,42 +1,149 @@
 generator client {
   provider = "prisma-client-js"
 }
-
 datasource db {
   provider = "postgresql"
-  url      = env("DATABASE_URL")
+  url = env("DATABASE_URL")
 }
-
-// User of MapSafe (future login system)
+enum Role {
+  USER
+  ADMIN
+}
+enum AccountStatus {
+  ACTIVE
+  SUSPENDED
+}
+enum ContentStatus {
+  ACTIVE
+  HIDDEN
+}
+enum VerificationMethod {
+  SELF_ATTESTED
+  GPS_VERIFIED
+}
+enum IncidentCategory {
+  THEFT
+  PICKPOCKETING
+  ROBBERY
+  ASSAULT
+  CAR_BREAK_IN
+  HIJACKING
+  HARASSMENT
+  VANDALISM
+  SUSPICIOUS_ACTIVITY
+  POOR_LIGHTING
+  LACK_OF_SECURITY
+  OTHER
+}
+// Existing users are preserved; legacy accounts are never automatically linked by email.
 model User {
-  id        String   @id @default(cuid())
-  name      String
-  email     String   @unique
+  id String @id @default(cuid())
+  googleSubject String? @unique
+  name String
+  email String @unique
+  avatarUrl String?
+  role Role @default(USER)
+  status AccountStatus @default(ACTIVE)
   createdAt DateTime @default(now())
-
-  ratings   Rating[]
+  updatedAt DateTime @updatedAt
+  ratings Rating[]
+  areas Area[]
+  sessions Session[]
+  audits AdminAuditLog[]
+  legacyRatings LegacyRating[]
+  @@index([status, createdAt])
 }
-
-// A location on the map (area being rated)
-model Location {
-  id        String   @id @default(cuid())
-  name      String
-  latitude  Float
-  longitude Float
-
-  ratings   Rating[]
+model Area {
+  id String @id @default(cuid())
+  name String
+  geometry Json
+  centroidLatitude Float
+  centroidLongitude Float
+  minLatitude Float
+  minLongitude Float
+  maxLatitude Float
+  maxLongitude Float
+  creatorId String
+  creator User @relation(fields: [creatorId], references: [id])
+  status ContentStatus @default(ACTIVE)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  ratings Rating[]
+  @@index([status, minLongitude, maxLongitude])
+  @@index([status, minLatitude, maxLatitude])
+  @@index([creatorId])
 }
-
-// Safety rating submitted by users (1 = safe, 10 = dangerous)
 model Rating {
-  id         String   @id @default(cuid())
-  score      Int
-  comment    String?
-  createdAt  DateTime @default(now())
-
-  userId     String
+  id String @id @default(cuid())
+  areaId String
+  area Area @relation(fields: [areaId], references: [id])
+  userId String
+  user User @relation(fields: [userId], references: [id])
+  score Int
+  comment String?
+  visitedAt DateTime
+  attestedAt DateTime
+  verificationMethod VerificationMethod @default(SELF_ATTESTED)
+  verifiedAt DateTime?
+  gpsAccuracy Float?
+  status ContentStatus @default(ACTIVE)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  incidents IncidentReport[]
+  @@index([areaId, status, createdAt])
+  @@index([userId, createdAt])
+}
+model IncidentReport {
+  id String @id @default(cuid())
+  ratingId String
+  rating Rating @relation(fields: [ratingId], references: [id])
+  category IncidentCategory
+  otherType String?
+  description String?
+  status ContentStatus @default(ACTIVE)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  @@index([ratingId, status])
+  @@index([status, createdAt])
+}
+// Store only the SHA-256 digest of a random browser session secret.
+model Session {
+  id String @id @default(cuid())
+  tokenHash String @unique
+  userId String
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+  expiresAt DateTime
+  @@index([userId])
+  @@index([expiresAt])
+}
+model AdminAuditLog {
+  id String @id @default(cuid())
+  actorId String
+  actor User @relation(fields: [actorId], references: [id])
+  entityType String
+  entityId String
+  previousStatus String
+  status String
+  reason String
+  createdAt DateTime @default(now())
+  @@index([createdAt])
+}
+// Archived point data is retained, not invented into four-corner area reports.
+model LegacyLocation {
+  id String @id
+  name String
+  latitude Float
+  longitude Float
+  ratings LegacyRating[]
+}
+model LegacyRating {
+  id String @id
+  score Int
+  comment String?
+  createdAt DateTime @default(now())
+  userId String
   locationId String
-
-  user       User     @relation(fields: [userId], references: [id])
-  location   Location @relation(fields: [locationId], references: [id])
+  user User @relation(fields: [userId], references: [id])
+  location LegacyLocation @relation(fields: [locationId], references: [id])
 }
