@@ -11,6 +11,8 @@ export default function handler(req, res) {
     const url = new URL(req.url, 'http://localhost');
     url.searchParams.delete('path');
     req.url = `${url.pathname}${url.search}`;
+    // The Vercel adapter also materializes query parameters on the request.
+    if (req.query && typeof req.query === 'object') delete req.query.path;
   }
   return app(req, res);
 }
