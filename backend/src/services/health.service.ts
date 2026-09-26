@@ -2,8 +2,8 @@
 
 export function getHealthStatus() {
   return {
-    status: "ok",
-    service: "mapsafe-backend",
+    status: 'ok',
+    service: 'mapsafe-backend',
     timestamp: new Date().toISOString(),
   };
 }

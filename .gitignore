@@ -218,3 +218,8 @@ Thumbs.db
 
 
 /generated/prisma
+
+# Isolated local PostgreSQL and browser test artifacts
+.local/
+playwright-report/
+test-results/

@@ -1,16 +1,21 @@
-import app from "./app";
+import 'dotenv/config';
+import { createApp } from './app.js';
+import { loadConfig } from './config.js';
+import { prisma } from './prisma/client.js';
 
-/**
- * Define the port the server will run on
- * Default is 3000 for local development
- */
-const PORT = process.env.PORT || 3000;
-
-/**
- * Start the Express server
- * This function "boots up" the backend application
- */
-app.listen(PORT, () => {
-  console.log(` MapSafe backend running on http://localhost:${PORT}`);
-  console.log(` Health check available at http://localhost:${PORT}/health`);
+const config = loadConfig();
+await prisma.$connect();
+const server = createApp({ db: prisma, config }).listen(config.PORT, () => {
+  console.log(
+    JSON.stringify({ event: 'server_started', port: config.PORT, environment: config.NODE_ENV }),
+  );
 });
+// Stop accepting requests before releasing database connections during a rolling deploy.
+for (const signal of ['SIGINT', 'SIGTERM'] as const) {
+  process.on(signal, () => {
+    server.close(() => {
+      void prisma.$disconnect().then(() => process.exit(0));
+    });
+    setTimeout(() => process.exit(1), 10_000).unref();
+  });
+}

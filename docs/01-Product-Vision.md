@@ -1,44 +1,22 @@
-# Product Vision — MapSafe
+# Product vision
 
-## The Problem 
+MapSafe helps people understand how an area feels to people who recently visited it. Tourists, residents, students, delivery drivers and e-hailing drivers can browse community experiences on a map before deciding where to go.
 
-People travelling through unfamiliar areas often have little trustworthy, location-specific information about how safe those places currently are. Existing map services provide navigation but do not offer community-driven, continuously updated safety insights. As a result, tourists, residents, students, delivery drivers, and e-hailing drivers may unknowingly enter areas where recent conditions have changed.
+The product answers: **“Based on community experiences, how safe does this area currently appear to be?”** A score is a summary of subjective reports, not a prediction, crime statistic or guarantee. Conditions change, participation is uneven, and reports can be mistaken or malicious.
 
-## The Mission
+## Principles
 
-Map Safe empowers people to make safer travel decisions by providing verified, community-driven safety information displayed directly on an interactive map.
+- **Context before certainty.** Show the score, report count, dates, comments and verification method together. A place without reports has no score; it is not automatically safe.
+- **Recent experience matters.** Visits must be within seven days when submitted. Reports contribute to an exponential time-weighted score with a configurable 180-day half-life.
+- **Clear boundaries.** Contributors draw editable quadrilaterals describing the area they experienced. A point or radius is not the current model.
+- **Privacy by design.** Browsing requires no account. GPS verification is optional; raw verification coordinates are not retained. Public identities exclude email and Google identifiers.
+- **Responsible participation.** Contributors attest to a personal visit, overlap cooldowns limit repeated influence, and administrators moderate content with an audit trail.
+- **Accessible and affordable.** Mobile browsers and desktops share one responsive web application. Core technology is open source; paid services require an explicit future decision.
 
-## The Vision
+## Scope
 
-To become the world's most trusted community-powered safety map, helping people confidently explore unfamiliar places through reliable, real-time location insights.
+The web MVP includes anonymous browsing, explicit place search, Google sign-in, area drawing, ratings, optional incident reports and administration. Self-attested and GPS-verified reports are visibly distinct. GPS checks supplied coordinates against the area at submission; it cannot establish that an incident occurred.
 
-## Core Values
+Emergency response, police integration, predictive crime scoring, tracking individuals, navigation routing, native applications and official crime-data feeds are outside this release. A future native client can reuse the versioned API after its authentication transport is designed and reviewed.
 
-1.Trust – Ratings should be based on real experiences.
-2.Accuracy – Recent information matters.
-3.Privacy – User location is protected.
-4.Transparency – Explain how safety scores are calculated.
-5.Community – Built by people for people.
-
-## Goals
-
-- Provide crowd-sourced safety ratings per location
-- Ensure ratings are based on real physical visits
-- Display safety visually on an interactive map
-- Prioritise recent data for accuracy
-
-
-## Non-Goals (for MVP)
-
-- Real-time emergency response system
-- Police integration
-- AI crime prediction
-- Surveillance or tracking individuals
-
-## Core Principles
-
-- Trust through verified visits
-- Simplicity in user experience
-- Transparency in scoring
-- Privacy of user location data
-
+MapSafe should not be the sole basis for emergency decisions. Contact appropriate local emergency services in an emergency.
