@@ -1,5 +1,11 @@
 import { useEffect, useRef, useState } from 'react';
-import { AttributionControl, GeoJSONSource, Map as LibreMap, Marker, setWorkerUrl } from 'maplibre-gl';
+import {
+  AttributionControl,
+  GeoJSONSource,
+  Map as LibreMap,
+  Marker,
+  setWorkerUrl,
+} from 'maplibre-gl';
 import workerUrl from 'maplibre-gl/dist/maplibre-gl-worker.mjs?worker&url';
 import { Compass, LocateFixed, Minus, Plus, RotateCcw } from 'lucide-react';
 import 'maplibre-gl/dist/maplibre-gl.css';
