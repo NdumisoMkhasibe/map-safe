@@ -135,13 +135,14 @@ Record command, environment, result and coverage summary when each check actuall
 - [x] Run the non-production seed repeatedly; confirm it is repeatable and clearly labelled demo content.
 - [x] Pass formatting, lint and strict typechecking with `npm run check`.
 - [x] Pass backend and frontend unit/component suites: 50 domain tests and 2 score component tests.
-- [x] Pass the PostgreSQL API integration suite (4 tests, including unauthorised mutation and CSRF rejection).
-- [ ] Add database-backed concurrent submission and broader admin/auth moderation cases.
+- [x] Pass the PostgreSQL API integration suite (7 tests, including auth persistence, role bootstrap, concurrency and moderation).
+- [x] Add database-backed concurrent submission and broader admin/auth moderation cases.
 - [x] Measure unit/component coverage with `npm run test:coverage`; record actual values below.
-- [x] Pass all 8 browser journeys on desktop and mobile with controlled external-service doubles.
+- [x] Pass all 10 browser journeys on desktop and mobile with controlled external-service doubles.
 - [x] Build backend and frontend with `npm run check` (MapLibre vendor chunk: 1,029.68 kB minified / 280.81 kB gzip).
-- [ ] Inspect mobile and desktop layouts, keyboard navigation, attribution and provider-failure states.
-- [ ] Configure real Google credentials and manually verify sign-in/logout/admin bootstrap on the intended origin.
+- [x] Inspect desktop/mobile layouts, keyboard navigation and provider attribution with seeded browser captures; reposition the map score legend and provider label so they no longer cover the attribution control.
+- [x] Review map-provider failure behavior: the fallback message, community browsing and coordinate-based report setup remain available. Browser journeys use a controlled local style fixture, not the live provider.
+- [ ] Complete manual Google sign-in/logout/admin-bootstrap checks on the intended origin. The owner reports that real local Google sign-in now succeeds; automated database checks use a controlled verifier and do not replace this live-service check.
 - [ ] Validate chosen live map provider and, if enabled, operator-approved search configuration.
 - [ ] Review public data privacy, production env, migrations/backups and current dependency findings.
 - [ ] Review Git diff/status for secrets, generated artifacts and unintended changes.
@@ -154,9 +155,9 @@ Record command, environment, result and coverage summary when each check actuall
 - `npm run build`: passed for backend and frontend. The separate MapLibre chunk is approximately 1.03 MB minified / 281 kB gzip and should be reviewed for a future mobile-network budget.
 - `npm run test:coverage`: passed, but measured coverage is **18.33% backend lines / 15.74% functions / 15.77% branches** and **2.17% frontend lines / 1.44% functions / 3.44% branches**. These are far below the proposed target; the small local unit/component suite does not exercise API/services or full UI flows.
 - The repository's embedded PostgreSQL 18.4 instance responded on `127.0.0.1:55432`; the launcher was updated to recognize and reuse that process. Both migrations applied to a clean `mapsafe_test` database. An initial development migration attempt exposed a retained `Rating_pkey` index name after table rename; the forward migration now renames legacy constraints first. The development seed ran repeatedly without duplicate data.
-- `npm run test:integration`: passed all 4 API tests against `mapsafe_test`. The suite still lacks concurrent submission and full moderation coverage.
-- `npm run test:e2e`: passed all 8 Playwright journeys across desktop and mobile against `mapsafe_e2e`, using development auth and a local map style fixture. This does not validate live Google sign-in or a production map provider. Hosted CI has not been observed.
-- Real Google credential sign-in, manual responsive/accessibility review, deployment, and live provider configuration were not performed.
+- `npm run test:integration`: passed all 7 API tests against `mapsafe_test`. Added controlled Google-identity cases confirm user upsert and PostgreSQL persistence, hashed sessions, authoritative `ADMIN_EMAILS` bootstrap, denial of an allowlisted but non-authoritative email, admin-only access, audited suspension/session revocation, admin-account protection, and one-winner behavior for concurrent overlapping submissions. These cases exercise the API and database with a test identity verifier; they do not call Google.
+- `npm run test:e2e`: passed all 10 Playwright journeys across desktop and mobile against `mapsafe_e2e`, using development auth and a local map style fixture. Coverage includes provider-failure fallback and desktop/mobile attribution visibility/non-overlap assertions. This does not validate live Google sign-in or a production map provider. Hosted CI has not been observed.
+- The owner reports that real Google sign-in succeeds locally. This turn's Google auth integration coverage uses a controlled verifier; manual logout/admin-bootstrap checks remain open. Desktop/mobile screenshots were visually reviewed with fictional data and a controlled map fixture; keyboard navigation and the provider-failure fallback are covered by browser journeys. Live map-provider integration remains open.
 
 ## External setup and release boundary
 

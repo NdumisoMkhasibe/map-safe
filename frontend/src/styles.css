@@ -335,8 +335,9 @@ button:disabled {
 }
 .map-provider {
   position: absolute;
+  top: 124px;
   right: 10px;
-  bottom: 4px;
+  bottom: auto;
   z-index: 3;
   padding: 3px 6px;
   color: #36504b;
@@ -770,7 +771,7 @@ button:disabled {
 }
 .map-legend {
   position: absolute;
-  right: 75px;
+  right: 310px;
   bottom: 11px;
   z-index: 4;
   display: flex;
@@ -1461,9 +1462,6 @@ button:disabled {
     right: 68px;
     bottom: calc(min(43vh, 390px) + 17px);
   }
-  .map-provider {
-    bottom: calc(min(43vh, 390px) + 3px);
-  }
   .map-top-note {
     top: 68px;
     right: 12px;
@@ -1526,9 +1524,6 @@ button:disabled {
   .legend-gradient,
   .legend-labels {
     width: 64px;
-  }
-  .map-provider {
-    bottom: calc(40vh + 1px);
   }
   .incident-grid {
     grid-template-columns: 1fr;

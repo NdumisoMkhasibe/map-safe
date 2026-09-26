@@ -3,17 +3,20 @@ import { expect, test, type Page } from '@playwright/test';
 // A minimal deterministic map style replaces only the tile provider. MapLibre,
 // drawing, API requests, authentication sessions and PostgreSQL remain real.
 test.beforeEach(async ({ page }) => {
+  const failMapProvider = test.info().title === 'map provider failure keeps reporting available';
   await page.route('**/e2e-map-style.json', (route) =>
-    route.fulfill({
-      json: {
-        version: 8,
-        glyphs: 'http://127.0.0.1:4173/e2e-glyphs/{fontstack}/{range}.pbf',
-        sources: {},
-        layers: [
-          { id: 'background', type: 'background', paint: { 'background-color': '#e6eee9' } },
-        ],
-      },
-    }),
+    failMapProvider
+      ? route.abort()
+      : route.fulfill({
+          json: {
+            version: 8,
+            glyphs: 'http://127.0.0.1:4173/e2e-glyphs/{fontstack}/{range}.pbf',
+            sources: {},
+            layers: [
+              { id: 'background', type: 'background', paint: { 'background-color': '#e6eee9' } },
+            ],
+          },
+        }),
   );
   await page.route('**/e2e-glyphs/**', (route) => route.fulfill({ body: Buffer.alloc(0) }));
   // The frontend dev server can accept requests before the API process has
@@ -42,9 +45,21 @@ async function signIn(page: Page, persona: 'user' | 'admin') {
 test('anonymous visitors browse reports, open details and read privacy information', async ({
   page,
 }) => {
-  await expect(
-    page.getByRole('region', { name: 'Interactive community safety map' }),
-  ).toBeVisible();
+  await expect(page.getByRole('region', { name: 'Interactive community safety map' })).toBeVisible({
+    timeout: 15_000,
+  });
+  const attribution = page.locator('.maplibregl-ctrl-attrib');
+  await expect(attribution).toContainText('OpenFreeMap');
+  const legendBox = await page.locator('.map-legend').boundingBox();
+  const attributionBox = await attribution.boundingBox();
+  expect(legendBox).not.toBeNull();
+  expect(attributionBox).not.toBeNull();
+  const legendOverlapsAttribution =
+    legendBox!.x < attributionBox!.x + attributionBox!.width &&
+    legendBox!.x + legendBox!.width > attributionBox!.x &&
+    legendBox!.y < attributionBox!.y + attributionBox!.height &&
+    legendBox!.y + legendBox!.height > attributionBox!.y;
+  expect(legendOverlapsAttribution).toBe(false);
   await expect(
     page.getByText('Community reports, not official crime statistics.', { exact: false }).first(),
   ).toBeVisible();
@@ -58,6 +73,17 @@ test('anonymous visitors browse reports, open details and read privacy informati
     path: `test-results/browse-${test.info().project.name}.png`,
     fullPage: true,
   });
+});
+
+test('map provider failure keeps reporting available', async ({ page }) => {
+  await expect(
+    page.getByRole('status').filter({ hasText: 'The map provider is unavailable.' }),
+  ).toBeVisible();
+  await expect(page.locator('.area-card').first()).toBeVisible();
+  await signIn(page, 'user');
+  await page.getByRole('button', { name: 'Rate an area', exact: true }).first().click();
+  await page.getByRole('button', { name: 'Start with an adjustable shape' }).click();
+  await expect(page.getByRole('group', { name: 'Corner 1', exact: true })).toBeVisible();
 });
 
 test('a signed-in visitor draws, edits and rates an area; cooldown blocks a duplicate', async ({
