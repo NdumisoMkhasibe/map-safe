@@ -33,7 +33,16 @@ export type Config = z.infer<typeof envSchema>;
 
 /** Invalid production settings fail at startup instead of silently weakening security. */
 export function loadConfig(environment: NodeJS.ProcessEnv = process.env): Config {
-  const config = envSchema.parse(environment);
+  const vercelOrigin =
+    environment.VERCEL_ENV === 'production'
+      ? environment.VERCEL_PROJECT_PRODUCTION_URL
+      : environment.VERCEL_URL;
+  const config = envSchema.parse({
+    ...environment,
+    NODE_ENV: environment.NODE_ENV ?? (environment.VERCEL ? 'production' : undefined),
+    FRONTEND_ORIGIN:
+      environment.FRONTEND_ORIGIN ?? (vercelOrigin ? `https://${vercelOrigin}` : undefined),
+  });
   if (new URL(config.FRONTEND_ORIGIN).origin !== config.FRONTEND_ORIGIN)
     throw new Error('FRONTEND_ORIGIN must contain only the origin');
   if (config.NODE_ENV === 'production') {
